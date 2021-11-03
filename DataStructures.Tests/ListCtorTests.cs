@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace DataStructures.Tests;
 
-public class ListCtorTest
+public class ListCtorTests
 {
     [Fact]
     public void ParameterLess()

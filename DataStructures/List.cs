@@ -60,9 +60,9 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public static List<T> operator +(List<T> a, List<T> b)
     {
         var newCount = a.Count + b.Count;
-        var newArray = new T[newCount+newCount/4];
-        a._array.CopyTo(newArray, 0);
-        b._array.CopyTo(newArray, a.Count);
+        var newArray = new T[newCount];
+        a.ToArray().CopyTo(newArray, 0);
+        b.ToArray().CopyTo(newArray, a.Count);
         return new List<T>(newArray);
     }
     
@@ -81,7 +81,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         if(a.Count != b.Count)
             return false;
         for (var i = 0; i < a.Count; i++)
-            if(Comparer<T>.Default.Compare(a[i], b[i]) < 0)
+            if(Comparer<T>.Default.Compare(a[i], b[i]) != 0)
                 return false;
         return true;
     }
@@ -92,7 +92,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         if(a.Count != b.Count)
             return true;
         for (var i = 0; i < a.Count; i++)
-            if(Comparer<T>.Default.Compare(a[i], b[i]) < 0)
+            if(Comparer<T>.Default.Compare(a[i], b[i]) != 0)
                 return true;
         return false;
     }
@@ -133,12 +133,13 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public void InsertAt(int index, params T[] values)
     {
         var newArray = new T[_capacity + values.Length];
-        for (var (c, i) = (0, 0); c < Count; c++, i++)
+        for (var (c, i) = (0, 0); c < Count + 1; c++, i++)
         {
             if (c == index)
                 foreach (var t in values)
                     newArray[i++] = t;
-            newArray[i] = _array[c];
+            if (c < Count)
+                newArray[i] = _array[c];
         }
         _array = newArray;
         Count+=values.Length;
@@ -148,7 +149,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public int IndexAt(T value)
     {
         for(var i = 0; i < Count; i++)
-            if(Comparer<T>.Default.Compare(_array[i], value) >= 0)
+            if(Comparer<T>.Default.Compare(_array[i], value) == 0)
                 return i;
         return -1;
     }
@@ -163,7 +164,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public bool Contains(T value)
     {
         for(var i = 0; i < Count; i++)
-            if(Comparer<T>.Default.Compare(_array[i], value) >= 0)
+            if(Comparer<T>.Default.Compare(_array[i], value) == 0)
                 return true;
         return false;
     }
@@ -189,13 +190,13 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public T[] ToArray()
     {
         var newArray = new T[Count];
-        for(int i = 0; i < Count; i++)
+        for(var i = 0; i < Count; i++)
             newArray[i] = _array[i];
         return newArray;
     }
     
     public override string ToString()
-        => string.Join(", ", _array);
+        => string.Join(", ", ToArray());
 
     public void Push(T value)
         => Add(value);
