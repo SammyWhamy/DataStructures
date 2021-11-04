@@ -70,7 +70,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         List<T> newList = new(baseList);
         foreach (var t in removeList)
         {
-            var index = newList.IndexAt(t);
+            var index = newList.IndexOf(t);
             if(index != -1) 
                 newList.RemoveAt(index);
         }
@@ -125,8 +125,32 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
             _array[_count++] = t;
     }
 
+    public bool Remove(T value)
+    {
+        var index = IndexOf(value);
+        if(index == -1)
+            return false;
+        RemoveAt(index);
+        return true;
+    }
+    
+    public int RemoveAll(Func<T, bool> predicate)
+    {
+        var count = 0;
+        for(var i = 0; i < _count; i++)
+        {
+            if (!predicate(_array[i])) continue;
+            RemoveAt(i);
+            i--;
+            count++;
+        }
+        return count;
+    }
+
     public void RemoveAt(int index)
     {
+        if(index < 0 || index >= _count)
+            throw new IndexOutOfRangeException();
         _count--;
         for (var i = index; i < _count; i++)
             _array[i] = _array[i + 1];
@@ -143,9 +167,17 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
             _array[index + i] = values[i];
     }
     
-    public int IndexAt(T value)
+    public int IndexOf(T value)
     {
         for(var i = 0; i < _count; i++)
+            if(Comparer<T>.Default.Compare(_array[i], value) == 0)
+                return i;
+        return -1;
+    }
+    
+    public int LastIndexOf(T value)
+    {
+        for(var i = _count - 1; i >= 0; i--)
             if(Comparer<T>.Default.Compare(_array[i], value) == 0)
                 return i;
         return -1;
@@ -175,6 +207,28 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         return newIntList;
     }
 
+    public T Find(Func<T, bool> predicate)
+    {
+        for (var i = 0; i < _count; i++)
+            if (predicate(_array[i]))
+                return _array[i];
+        return default!;
+    }
+    
+    public T FindLast(Func<T, bool> predicate)
+    {
+        for (var i = _count - 1; i >= 0; i--)
+            if (predicate(_array[i]))
+                return _array[i];
+        return default!;
+    }
+    
+    public void ForEach(Action<T> action)
+    {
+        for (var i = 0; i < _count; i++)
+            action(_array[i]);
+    }
+
     public List<T> Distinct()
     {
         List<T> distinctList = new(_capacity);
@@ -182,6 +236,19 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
             if(!distinctList.Contains(this[i]))
                 distinctList.Add(this[i]);
         return distinctList;
+    }
+    
+    public List<T> Reverse()
+    {
+        var i1 = 0;
+        var i2 = _count - 1;
+        while (i1 < i2)
+        {
+            (_array[i1], _array[i2]) = (_array[i2], _array[i1]);
+            i1++;
+            i2--;
+        }
+        return this;
     }
     
     public T[] ToArray()
@@ -228,15 +295,10 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     }
 
     IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+        => GetEnumerator();
     
     public IEnumerator<T> GetEnumerator()
-    {
-        for(var i = 0; i < _count; i++)
-            yield return this[i];
-    }
+        => new ListEnumerator<T>(this);
 
     public override bool Equals(object? obj)
     {
@@ -247,4 +309,17 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
 
     public override int GetHashCode() 
         => throw new InvalidOperationException("GetHashCode should not be used on List<T>");
+
+    private class ListEnumerator<T1> : IEnumerator<T1>
+    {
+        private int _position = -1;
+        private readonly List<T1> _list;
+        
+        public ListEnumerator(List<T1> list) => _list = list;
+        public bool MoveNext() => ++_position < _list.Count;
+        public void Reset() => _position = -1;
+        public T1 Current => _list[_position];
+        object? IEnumerator.Current => Current;
+        public void Dispose() {}
+    }
 }

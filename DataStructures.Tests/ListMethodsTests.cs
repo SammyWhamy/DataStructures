@@ -4,10 +4,12 @@ public class ListMethodsTests
 {
     private readonly List<string> _list;
     private readonly List<string> _smallList;
+    private readonly List<string> _dupeList;
     public ListMethodsTests()
     {
         _list = new List<string>("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten");
         _smallList = new List<string>("one", "two", "three");
+        _dupeList = new List<string>("one", "two", "three", "one", "two", "three", "one", "two", "three");
     }
     
     [Theory]
@@ -25,7 +27,7 @@ public class ListMethodsTests
     [InlineData("doesntExist", -1)]
     public void ListIndexAt(string value, int index)
     {
-        Assert.Equal(index, _list.IndexAt(value));
+        Assert.Equal(index, _list.IndexOf(value));
     }
 
     [Theory]
@@ -68,6 +70,15 @@ public class ListMethodsTests
         _smallList.RemoveAt(index);
         Assert.Equal(expectedCount, _smallList.Count);
         Assert.Equal(expected, _smallList.ToArray());
+    }
+    
+    [Theory]
+    [InlineData(-312)]
+    [InlineData(-1)]
+    [InlineData(321312)]
+    public void ListRemoveAtInvalidIndex(int index)
+    {
+        Assert.Throws<IndexOutOfRangeException>(() => _smallList.RemoveAt(index));
     }
 
     [Theory]
@@ -139,5 +150,39 @@ public class ListMethodsTests
     {
         Assert.Equal("one, two, three, four, five, six, seven, eight, nine, ten", _list.ToString());
         Assert.Equal("one, two, three", _smallList.ToString());
+    }
+    
+    [Theory]
+    [InlineData("one", new [] { "two", "three" })]
+    [InlineData("two", new [] { "one", "three" })]
+    [InlineData("three", new [] { "one", "two" })]
+    public void ListRemove(string value, string[] expected)
+    {
+        var expectedCount = _smallList.Count-1;
+        Assert.True(_smallList.Remove(value));
+        Assert.Equal(expectedCount, _smallList.Count);
+        Assert.Equal(expected, _smallList.ToArray());
+    }
+    
+    [Theory]
+    [InlineData("hello", new [] { "one", "two", "three" })]
+    [InlineData("nope", new [] { "one", "two", "three" })]
+    [InlineData("10", new [] { "one", "two", "three" })]
+    public void ListRemoveNonExistentValue(string value, string[] expected)
+    {
+        Assert.False(_smallList.Remove(value));
+        Assert.Equal(expected.Length, _smallList.Count);
+        Assert.Equal(expected, _smallList.ToArray());
+    }
+
+    [Theory]
+    [InlineData("one", 6)]
+    [InlineData("two", 7)]
+    [InlineData("three", 8)]
+    [InlineData("nope", -1)]
+    [InlineData("hello", -1)]
+    public void ListLastIndexOf(string value, int expected)
+    {
+        Assert.Equal(expected, _dupeList.LastIndexOf(value));
     }
 }

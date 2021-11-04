@@ -57,6 +57,14 @@ public class ListPureMethodTests
     }
     
     [Fact]
+    public void ListEnumeratorReset()
+    {
+        using var enumerator = _list.GetEnumerator();
+        enumerator.Reset();
+        Assert.Throws<IndexOutOfRangeException>(() => enumerator.Current);
+    }
+    
+    [Fact]
     public void ListEqualsObjectNullReference()
     {
         Assert.False(_list.Equals(obj: null));
