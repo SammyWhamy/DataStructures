@@ -1,17 +1,9 @@
-﻿using System;
-using DataStructures;
+﻿using DataStructures;
 
-var _listA = new List<string>("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten");
-var _listB = new List<string>("six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen");
-
-foreach(var item in _listB) {
-    _listA.Add(item);
-}
-
-var count = _listA.Count;
-for(var i = 0; i < count; i++)
-{
-    _listA.Pop();
-}
-
-return 0;
+List<int> list = new();
+for (var i = 0; i < 10000; i++)
+    list.Add(i);
+for (var i = 0; i < 10000; i++)
+    list.InsertAt(i, i);
+for (var i = 0; i < 10000; i++)
+    list.RemoveAt(i);
