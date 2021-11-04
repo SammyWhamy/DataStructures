@@ -7,6 +7,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     private T[] _array;
     private int _capacity;
     public int Count { get; private set; }
+    private const double GrowthFactor = 1.618f;
 
     public List()
     {
@@ -105,7 +106,10 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
 
     private void Resize(int space = 0)
     {
-        _capacity = Count + space + (Count+space) / 4;
+        var neededSpace = Count + space;
+        if (neededSpace <= _capacity && !(_capacity / GrowthFactor > neededSpace)) return;
+        if (neededSpace > _capacity) _capacity = (int) (neededSpace * GrowthFactor);
+        else _capacity = (int) Math.Ceiling(_capacity/GrowthFactor);
         var newArray = new T[_capacity];
         for(var i = 0; i < Count; i++)
             newArray[i] = _array[i];
@@ -121,11 +125,14 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
 
     public void RemoveAt(int index)
     {
-        var newArray = new T[_capacity - 1];
-        for (var (c, i) = (0, 0); c < Count; c++, i++)
-            if (c == index) i--;
-            else newArray[i] = _array[c];
-        _array = newArray;
+        if (index == Count-1) _array[^1] = default!;
+        else {
+            var newArray = new T[_capacity - 1];
+            for (var (c, i) = (0, 0); c < Count; c++, i++)
+                if (c == index) i--;
+                else newArray[i] = _array[c];
+            _array = newArray;
+        }
         Count--;
         Resize();
     }
