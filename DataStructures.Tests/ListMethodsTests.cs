@@ -5,11 +5,13 @@ public class ListMethodsTests
     private readonly List<string> _list;
     private readonly List<string> _smallList;
     private readonly List<string> _dupeList;
+    private readonly List<int> _intList;
     public ListMethodsTests()
     {
         _list = new List<string>("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten");
         _smallList = new List<string>("one", "two", "three");
         _dupeList = new List<string>("one", "two", "three", "one", "two", "three", "one", "two", "three");
+        _intList = new List<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
     
     [Theory]
@@ -153,15 +155,15 @@ public class ListMethodsTests
     }
     
     [Theory]
-    [InlineData("one", new [] { "two", "three" })]
-    [InlineData("two", new [] { "one", "three" })]
-    [InlineData("three", new [] { "one", "two" })]
-    public void ListRemove(string value, string[] expected)
+    [InlineData(new [] {2}, new [] {1, 3, 4, 5, 6, 7, 8, 9, 10})]
+    [InlineData(new [] {2, 3, 4}, new [] {1, 5, 6, 7, 8, 9, 10})]
+    [InlineData(new [] {3, 4, 7, 8, 10}, new [] {1, 2, 5, 6, 9})]
+    [InlineData(new [] {-1, 391, -391, int.MaxValue, int.MinValue}, new [] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5)]
+    public void ListRemove(int[] toRemove, int[] expected, int minus = 0)
     {
-        var expectedCount = _smallList.Count-1;
-        Assert.True(_smallList.Remove(value));
-        Assert.Equal(expectedCount, _smallList.Count);
-        Assert.Equal(expected, _smallList.ToArray());
+        Assert.Equal(toRemove.Length-minus, _intList.Remove(toRemove));
+        Assert.Equal(expected.Length, _intList.Count);
+        Assert.Equal(expected, _intList.ToArray());
     }
     
     [Theory]
@@ -170,7 +172,7 @@ public class ListMethodsTests
     [InlineData("10", new [] { "one", "two", "three" })]
     public void ListRemoveNonExistentValue(string value, string[] expected)
     {
-        Assert.False(_smallList.Remove(value));
+        Assert.Equal(0, _smallList.Remove(value));
         Assert.Equal(expected.Length, _smallList.Count);
         Assert.Equal(expected, _smallList.ToArray());
     }

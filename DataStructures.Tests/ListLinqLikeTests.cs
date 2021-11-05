@@ -39,7 +39,7 @@ public class ListLinqLikeTests
     {
         Assert.Equal(1, _intList.Find(x => x < 3));
         Assert.Equal(6, _intList.Find(x => x > 5));
-        Assert.Equal(null, _list.Find(x => x == "woah"));
+        Assert.Null(_list.Find(x => x == "woah"));
     }
     
     [Fact]
@@ -47,7 +47,7 @@ public class ListLinqLikeTests
     {
         Assert.Equal(2, _intList.FindLast(x => x < 3));
         Assert.Equal(10, _intList.FindLast(x => x > 5));
-        Assert.Equal(null, _list.FindLast(x => x == "woah"));
+        Assert.Null(_list.FindLast(x => x == "woah"));
     }
 
     [Fact]

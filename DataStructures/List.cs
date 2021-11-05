@@ -68,12 +68,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     public static List<T> operator -(List<T> baseList, List<T> removeList)
     {
         List<T> newList = new(baseList);
-        foreach (var t in removeList)
-        {
-            var index = newList.IndexOf(t);
-            if(index != -1) 
-                newList.RemoveAt(index);
-        }
+        newList.Remove(removeList.ToArray());
         return newList;
     }
 
@@ -124,29 +119,20 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         foreach(var t in values)
             _array[_count++] = t;
     }
-
-    // public bool Remove(T value)
-    // {
-    //     var index = IndexOf(value);
-    //     if(index == -1)
-    //         return false;
-    //     RemoveAt(index);
-    //     return true;
-    // }
     
-    public void Remove(params T[] values)
+    public int Remove(params T[] values)
     {
-        var indexes = values.OrderBy(IndexOf).ToArray();
-        var cantRemove = 0;
-        for (var (i, j, k) = (0, 0, 0); k + j < _count; i++)
+        var indexes = new int[values.Length];
+        var count = 0;
+        for (var (i, v) = (0, 0); i < values.Length; i++)
         {
-            var index = IndexOf(values[j]);
-            if(index == -1) cantRemove++;
-            if (j < indexes.Length && i == index) j++;
-            else _array[k] = _array[k++ + j];
+            var index = IndexOf(values[i]);
+            if (index == -1) indexes[^++v] = index;
+            else indexes[count++] = index;
         }
-        _count -= indexes.Length - cantRemove;
-        Resize();
+        var toRemove = indexes[..count];
+        RemoveAt(toRemove);
+        return toRemove.Length;
     }
     
     public int RemoveAll(Func<T, bool> predicate)
@@ -164,8 +150,8 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
 
     public void RemoveAt(params int[] inputIndexes)
     {
-        for(var i = 0; i < inputIndexes.Length; i++)
-            if(inputIndexes[i] < 0 || inputIndexes[i] >= _count)
+        foreach (var t in inputIndexes)
+            if(t < 0 || t >= _count)
                 throw new IndexOutOfRangeException();
         var indexes = inputIndexes.OrderBy(x => x).ToArray();
         for (var (i, j, k) = (0, 0, 0); k + j < _count; i++)
