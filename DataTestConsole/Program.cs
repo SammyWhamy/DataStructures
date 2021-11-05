@@ -1,9 +1,6 @@
 ﻿using DataStructures;
+using System;
 
-List<int> list = new();
-for (var i = 0; i < 10000; i++)
-    list.Add(i);
-for (var i = 0; i < 10000; i++)
-    list.InsertAt(i, i);
-for (var i = 0; i < 10000; i++)
-    list.RemoveAt(i);
+List<int> list = new(1, 2, 3, 4, 5);
+list.Remove(0);
+Console.WriteLine(list);

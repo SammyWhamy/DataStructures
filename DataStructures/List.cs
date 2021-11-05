@@ -125,13 +125,28 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
             _array[_count++] = t;
     }
 
-    public bool Remove(T value)
+    // public bool Remove(T value)
+    // {
+    //     var index = IndexOf(value);
+    //     if(index == -1)
+    //         return false;
+    //     RemoveAt(index);
+    //     return true;
+    // }
+    
+    public void Remove(params T[] values)
     {
-        var index = IndexOf(value);
-        if(index == -1)
-            return false;
-        RemoveAt(index);
-        return true;
+        var indexes = values.OrderBy(IndexOf).ToArray();
+        var cantRemove = 0;
+        for (var (i, j, k) = (0, 0, 0); k + j < _count; i++)
+        {
+            var index = IndexOf(values[j]);
+            if(index == -1) cantRemove++;
+            if (j < indexes.Length && i == index) j++;
+            else _array[k] = _array[k++ + j];
+        }
+        _count -= indexes.Length - cantRemove;
+        Resize();
     }
     
     public int RemoveAll(Func<T, bool> predicate)
@@ -147,20 +162,23 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
         return count;
     }
 
-    public void RemoveAt(int index)
+    public void RemoveAt(params int[] inputIndexes)
     {
-        if(index < 0 || index >= _count)
-            throw new IndexOutOfRangeException();
-        _count--;
-        for (var i = index; i < _count; i++)
-            _array[i] = _array[i + 1];
+        for(var i = 0; i < inputIndexes.Length; i++)
+            if(inputIndexes[i] < 0 || inputIndexes[i] >= _count)
+                throw new IndexOutOfRangeException();
+        var indexes = inputIndexes.OrderBy(x => x).ToArray();
+        for (var (i, j, k) = (0, 0, 0); k + j < _count; i++)
+            if (j < indexes.Length && i == indexes[j]) j++;
+            else _array[k] = _array[k++ + j];
+        _count -= indexes.Length;
         Resize();
     }
     
     public void InsertAt(int index, params T[] values)
     {
+        Resize(values.Length);
         _count += values.Length;
-        Resize();
         for (var i = _count - 1; i >= index + values.Length; i--)
             _array[i] = _array[i - values.Length];
         for (var i = 0; i < values.Length; i++)
