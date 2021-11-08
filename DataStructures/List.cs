@@ -288,7 +288,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
     
     public bool Equals(List<T>? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
         if(this._count != other._count)
             return false;
@@ -306,7 +306,7 @@ public class List<T> : IEquatable<List<T>>, IEnumerable<T>
 
     public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
+        if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         return obj.GetType() == this.GetType() && Equals((List<T>)obj);
     }

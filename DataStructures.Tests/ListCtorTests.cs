@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace DataStructures.Tests;
 
 public class ListCtorTests
